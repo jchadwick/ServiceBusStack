@@ -10,7 +10,9 @@ namespace ServiceBus
     {
 	    public EndpointConfig()
 	    {
-            Configure.With(AllAssemblies.Except("ServiceBus.vshost.exe"));
+            Configure.With(AllAssemblies.Except("ServiceBus.vshost.exe"))
+                .DefiningMessagesAs(t => t.Namespace == "Contracts")
+                .DefineEndpointName("servicebus");
 	    }
     }
 }

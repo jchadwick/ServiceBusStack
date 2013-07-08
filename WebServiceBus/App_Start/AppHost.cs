@@ -2,22 +2,14 @@ using System.Data.Entity;
 using DataAccess;
 using Domain;
 using Funq;
+using NServiceBus;
 using ServiceStack.WebHost.Endpoints;
 
 [assembly: WebActivator.PreApplicationStartMethod(typeof(WebServiceBus.App_Start.AppHost), "Start")]
 
-
-/**
- * Entire ServiceStack Starter Template configured with a 'Hello' Web Service and a 'Todo' Rest Service.
- *
- * Auto-Generated Metadata API page at: /metadata
- * See other complete web service examples at: https://github.com/ServiceStack/ServiceStack.Examples
- */
-
 namespace WebServiceBus.App_Start
 {
-	public class AppHost
-		: AppHostBase
+	public class AppHost : AppHostBase
 	{		
 		public AppHost() //Tell ServiceStack the name and where to find your web services
             : base("Services", typeof(AppHost).Assembly) { }
@@ -29,6 +21,7 @@ namespace WebServiceBus.App_Start
             container.DefaultReuse = ReuseScope.Request;
 		    container.RegisterAutoWiredAs<MasterContext, DbContext>();
 		    container.RegisterAutoWiredAs<BankAccountRepository, IBankAccountRepository>();
+		    container.Register<IBus>(c => NServiceBusConfig.Bus);
 		}
 
 		/* Uncomment to enable ServiceStack Authentication and CustomUserSession

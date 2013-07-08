@@ -7,20 +7,23 @@ namespace WebServiceBus.App_Start
 {
     public class NServiceBusConfig
     {
+        public static IBus Bus { get; private set; }
+
         public static void Start()
         {
-            Configure.WithWeb()
-    .DefaultBuilder()
-    .ForMvc()
-    .JsonSerializer()
-    .Log4Net()
-    .MsmqTransport()
-    .IsTransactional(false)
-    .PurgeOnStartup(true)
-    .UnicastBus()
-    .ImpersonateSender(false)
-    .CreateBus()
-    .Start(() => Configure.Instance.ForInstallationOn<NServiceBus.Installation.Environments.Windows>().Install());
+            Bus = Configure.With()
+                    .DefineEndpointName("Website")
+                    .DefiningMessagesAs(t => t.Namespace == "Contracts")
+                    .Log4Net()
+                    .DefaultBuilder()
+                    .XmlSerializer()
+                    .MsmqTransport()
+                    .IsTransactional(false)
+                    .PurgeOnStartup(false)
+                    .UnicastBus()
+                        .ImpersonateSender(false)
+                    .CreateBus()
+                    .Start(() => Configure.Instance.ForInstallationOn<NServiceBus.Installation.Environments.Windows>().Install());
         }
     }
 }

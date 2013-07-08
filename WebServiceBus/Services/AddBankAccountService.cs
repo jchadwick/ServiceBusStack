@@ -1,26 +1,32 @@
-﻿using Contracts;
-using Domain;
-using ServiceStack.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Contracts;
+using NServiceBus;
 using ServiceStack.ServiceInterface;
 
 namespace WebServiceBus.Services
 {
     public class AddBankAccountService : Service
     {
-        public IBankAccountRepository Repository { get; set; }
+        public IBus Bus { get; set; }
 
         public AddBankAccountResponse Post(AddBankAccount request)
         {
-            var newAccount = new BankAccount().PopulateWith(request);
+            AddBankAccountResponse response = null;
 
-            Repository.Insert(newAccount);
-            Repository.Save();
+            var asyncResult = Bus.Send(request).Register(x => response = CompletionResultCallback<AddBankAccountResponse>(x), null);
 
-            return new AddBankAccountResponse
-                {
-                    AccountId = newAccount.Id,
-                    Success = newAccount.Id != 0, 
-                };
+            asyncResult.AsyncWaitHandle.WaitOne();
+
+            return response;
+        }
+
+        private static T CompletionResultCallback<T>(IAsyncResult result)
+        {
+            var completionResult = (CompletionResult)result.AsyncState;
+            var response = (T)completionResult.Messages[0];
+            return response;
         }
     }
 }
