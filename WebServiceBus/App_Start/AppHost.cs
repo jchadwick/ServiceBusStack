@@ -19,9 +19,35 @@ namespace WebServiceBus.App_Start
 			//Set JSON web services to return idiomatic JSON camelCase properties
 			ServiceStack.Text.JsConfig.EmitCamelCaseNames = true;
             container.DefaultReuse = ReuseScope.Request;
-		    container.RegisterAutoWiredAs<MasterContext, DbContext>();
+            container.Register<IBus>(NServiceBusConfig.Bus);
+            container.RegisterAutoWiredAs<MasterContext, DbContext>();
 		    container.RegisterAutoWiredAs<BankAccountRepository, IBankAccountRepository>();
-		    container.Register<IBus>(c => NServiceBusConfig.Bus);
+
+		    /*
+		       var referencedTypes = BuildManager.GetReferencedAssemblies().OfType<Assembly>().Where(x => x.FullName.Contains("JK")).SelectMany(x => x.GetTypes());
+            var implementations = referencedTypes.Where(x => !x.IsAbstract && !x.IsInterface);
+            
+            var interfacesWithOneImplementation = 
+                implementations.SelectMany(x => x.GetInterfaces())
+                    .GroupBy(x => x)
+                    .Where(x => x.Count() == 1)
+                    .SelectMany(x => x)
+                    .ToArray();
+
+            var singleImplementations =
+                from impl in implementations
+                from iface in interfacesWithOneImplementation
+                where impl.GetInterfaces().Contains(iface)
+                select new { Type = impl, Interface = iface };
+
+            var registerMethod = container.GetType().GetMethod("RegisterAutoWiredAs");
+
+            foreach (var impl in singleImplementations)
+            {
+                var method = registerMethod.MakeGenericMethod(new[] { impl.Type, impl.Interface });
+                method.Invoke(container, new object[0]);
+            }
+		    */
 		}
 
 		/* Uncomment to enable ServiceStack Authentication and CustomUserSession

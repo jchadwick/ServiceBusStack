@@ -13,20 +13,25 @@ namespace WebServiceBus.Services
 
         public AddBankAccountResponse Post(AddBankAccount request)
         {
-            AddBankAccountResponse response = null;
+            var context = new CallbackContext<AddBankAccountResponse>();
 
-            var asyncResult = Bus.Send(request).Register(x => response = CompletionResultCallback<AddBankAccountResponse>(x), null);
+            var asyncResult = Bus.Send(request).Register(CompletionResultCallback<AddBankAccountResponse>, context);
 
-            asyncResult.AsyncWaitHandle.WaitOne();
+            asyncResult.AsyncWaitHandle.WaitOne(50000);
 
-            return response;
+            return context.Result;
         }
 
-        private static T CompletionResultCallback<T>(IAsyncResult result)
+        private static void CompletionResultCallback<T>(IAsyncResult context)
         {
-            var completionResult = (CompletionResult)result.AsyncState;
-            var response = (T)completionResult.Messages[0];
-            return response;
+            var completionResult = (CompletionResult)context.AsyncState;
+            var result = (T)completionResult.Messages[0];
+            ((CallbackContext<T>)completionResult.State).Result = result;
+        }
+
+        class CallbackContext<T>
+        {
+            public T Result { get; set; }
         }
     }
 }

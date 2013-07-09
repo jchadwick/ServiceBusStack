@@ -11,16 +11,18 @@ namespace WebServiceBus.App_Start
 
         public static void Start()
         {
-            Bus = Configure.With()
+            Bus =
+                Configure.With()
                     .DefineEndpointName("Website")
                     .DefiningMessagesAs(t => t.Namespace == "Contracts")
                     .Log4Net()
                     .DefaultBuilder()
                     .XmlSerializer()
                     .MsmqTransport()
-                    .IsTransactional(false)
-                    .PurgeOnStartup(false)
+                        .IsTransactional(true)
+                        .PurgeOnStartup(true)
                     .UnicastBus()
+                        .LoadMessageHandlers()
                         .ImpersonateSender(false)
                     .CreateBus()
                     .Start(() => Configure.Instance.ForInstallationOn<NServiceBus.Installation.Environments.Windows>().Install());

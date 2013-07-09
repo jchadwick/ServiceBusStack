@@ -12,7 +12,11 @@ namespace ServiceBus
 	    {
             Configure.With(AllAssemblies.Except("ServiceBus.vshost.exe"))
                 .DefiningMessagesAs(t => t.Namespace == "Contracts")
-                .DefineEndpointName("servicebus");
+                .DefineEndpointName("servicebus")
+                .DefaultBuilder()
+                .MsmqTransport()
+                        .IsTransactional(true)
+                        .PurgeOnStartup(true);
 	    }
     }
 }
